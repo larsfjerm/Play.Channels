@@ -26,11 +26,11 @@ namespace Play.Channels
 
             var readTask = Task.Factory.StartNew(async () =>
             {
-                await foreach (var t in mainChannel.Reader.ReadAllAsync())
+                await foreach (var guidVal in mainChannel.Reader.ReadAllAsync())
                 {
                     foreach (var subChannel in _subProcessorsDict)
                     {
-                        await subChannel.Value.Write(t);
+                        await subChannel.Value.Write(guidVal);
                     }
 
                     if (_readCount++ % 1000 == 0)
@@ -76,8 +76,9 @@ namespace Play.Channels
 
             await writeTask;
             await readTask;
+            mainChannel.Writer.Complete();
 
-            Console.WriteLine("Channels completed");
+            Console.WriteLine($"Channels completed \t Read / Write: {_readCount} / {_writeCount}");
         }
     }
 }
